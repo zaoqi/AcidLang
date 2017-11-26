@@ -36,26 +36,41 @@
              [(eq? x 'quote)
               (let ([x (car xs)] [xs (cdr xs)])
                 (EVAL env (cons x stack) xs))]
-             [else (EVAL env (cons (hash-ref env x) stack) xs)])]
+             [(eq? x 'letrec)
+              (let ([ps (car xs)] [xs (cdr xs)])
+                (letrec
+                    ([defs (map (λ (p)
+                                  (cons (car p) (delay (EVAL1 newenv (cdr p))))) ps)]
+                     [newenv (hash-append env defs)])
+                  (EVAL newenv stack xs)))]
+             [else (EVAL env (cons (force (hash-ref env x)) stack) xs)])]
           [else (EVAL env (cons x stack) xs)]))))
+(define (EVAL1 env xs)
+  (let ([x (EVAL env null-stack xs)])
+    (if (and (pair? x) (null? (cdr x)))
+        (car x)
+        (error "type error"))))
+(define (hash-append h ps)
+  (foldl (λ (p h) (hash-set h (car p) (cdr p))) h ps))
 (define (APPLY f stack)
   (cond
     [(prim? f) (let-values ([(args stack) (split-at stack (prim-n f))])
                  (append (apply (prim-f f) args) stack))]
     [(closure? f) (EVAL (closure-env f) stack (closure-xs f))]
     [else (error "type error")]))
-(define (EVAL1 x)
+(define (FORCE x)
   (if (closure? x)
       (EVAL (closure-env x) null-stack (closure-xs x))
       x))
 (define (prim11 f) (prim 1 (λ (x) (list (f x)))))
 (define genv
   (hash
-   'if (prim 3 (λ (y x b) (list (if b (EVAL1 x) (EVAL1 y)))))
+   'if (prim 3 (λ (y x b) (list (if b (FORCE x) (FORCE y)))))
    'car (prim11 car)
    'cdr (prim11 cdr)
    'cons (prim 2 (λ (d a) (list (cons a d))))
    'pair? (prim11 pair?)
    'list? (prim11 list?)
+   'null? (prim11 null?)
    ))
 (define (acid xs) (EVAL genv null-stack xs))
