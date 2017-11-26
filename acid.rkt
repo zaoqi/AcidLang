@@ -26,13 +26,16 @@
            (cond
              [(eq? x '&)
               (let ([x (car xs)] [xs (cdr xs)])
-              (EVAL env (cons (closure env x) stack) xs))]
+                (EVAL env (cons (closure env x) stack) xs))]
              [(eq? x 'λ)
               (let ([x (car xs)] [xs (cdr xs)] [v (car stack)] [stack (cdr stack)])
                 (EVAL (hash-set env x v) stack xs))]
              [(eq? x '!)
               (let ([f (car stack)] [stack (cdr stack)])
                 (EVAL env (APPLY f stack) xs))]
+             [(eq? x 'quote)
+              (let ([x (car xs)] [xs (cdr xs)])
+                (EVAL env (cons x stack) xs))]
              [else (EVAL env (cons (hash-ref env x) stack) xs)])]
           [else (EVAL env (cons x stack) xs)]))))
 (define (APPLY f stack)
