@@ -67,6 +67,7 @@
 (define genv
   (hash
    'if (prim 3 (λ (y x b) (list (if b (FORCE x) (FORCE y)))))
+   '= (prim21 equal?)
    'car (prim11 car)
    'cdr (prim11 cdr)
    'cons (prim21 cons)
@@ -79,5 +80,9 @@
    '- (prim21 -)
    '* (prim21 *)
    '/ (prim21 /)
+   '< (prim21 <)
+   '> (prim21 >)
+   '=< (prim21 <=)
+   '>= (prim21 >=)
    ))
 (define (acid xs) (EVAL genv null-stack xs))
