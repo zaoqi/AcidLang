@@ -19,6 +19,6 @@
 (e (1 1 + !) 2)
 (e (2 & (1 cons !) !) '(2 . 1))
 (e (2 1) 1 2)
-(e (letrec ([map & (λ f λ xs xs null? ! () & (xs car ! f !
+(e (letrec ([map & (λ f λ xs xs null? ! & (()) & (xs car ! f !
                                                  xs cdr ! f map !
                                                  cons !) if !)]) quote (1 2 3) & (1 + !) map !) '(2 3 4))

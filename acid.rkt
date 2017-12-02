@@ -59,14 +59,12 @@
     [(closure? f) (EVAL (closure-env f) stack (closure-xs f))]
     [else (error "type error")]))
 (define (FORCE x)
-  (if (closure? x)
-      (EVAL1 (closure-env x) (closure-xs x))
-      x))
+  (EVAL (closure-env x) null-stack (closure-xs x)))
 (define (prim11 f) (prim 1 (λ (x) (list (f x)))))
 (define (prim21 f) (prim 2 (λ (y x) (list (f x y)))))
 (define genv
   (hash
-   'if (prim 3 (λ (y x b) (list (if b (FORCE x) (FORCE y)))))
+   'if (prim 3 (λ (y x b) (if b (FORCE x) (FORCE y))))
    '= (prim21 equal?)
    'car (prim11 car)
    'cdr (prim11 cdr)
